@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterData.Host", "MasterData.Host\MasterData.Host.csproj", "{DC44DE13-A3EF-4EDD-9B9A-6829E65BBC62}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterData.Model", "MasterData.Model\MasterData.Model.csproj", "{53FFD61C-F4F0-4C07-8CC9-F2E83D176CAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{DC44DE13-A3EF-4EDD-9B9A-6829E65BBC62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC44DE13-A3EF-4EDD-9B9A-6829E65BBC62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC44DE13-A3EF-4EDD-9B9A-6829E65BBC62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53FFD61C-F4F0-4C07-8CC9-F2E83D176CAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53FFD61C-F4F0-4C07-8CC9-F2E83D176CAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53FFD61C-F4F0-4C07-8CC9-F2E83D176CAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53FFD61C-F4F0-4C07-8CC9-F2E83D176CAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
