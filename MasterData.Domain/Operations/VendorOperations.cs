@@ -21,7 +21,7 @@ namespace MasterData.Host.Endpoints
             builder.MapPost("/", AddVendor).RequireAuthorization();
         }
 
-        public static async Task<int> AddVendor(NewVendorModel payload, [FromServices] IFacade facade, CancellationToken cancellationToken)
+        public static async Task<int> AddVendor(NewVendorModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
         {
             var vendor = new Vendor
             {
@@ -40,6 +40,8 @@ namespace MasterData.Host.Endpoints
             facade.Add(vendor);
 
             await facade.Save(cancellationToken);
+
+            await cache.RemoveAsync("vendors", cancellationToken);
 
             return vendor.Id;
         }
