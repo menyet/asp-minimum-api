@@ -1,4 +1,5 @@
 using MasterData.Domain;
+using MasterData.Host.Configuration;
 using MasterData.Host.Endpoints;
 
 using Microsoft.EntityFrameworkCore;
@@ -12,17 +13,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DatabaseContext>(_ => _.UseSqlServer(builder.Configuration.GetConnectionString("SQLDatabase")));
 
-
-var assembly = typeof(VendorOperations).Assembly;
-var types = assembly.GetTypes().Where(_ => _.IsClass && !_.IsAbstract).ToArray();
-
-foreach (var t in types.Where(_ => _.IsAssignableTo(typeof(IDbFacade))))
-{
-    foreach (var i in t.GetInterfaces().Where(_ => _.Assembly == assembly))
-    {
-        builder.Services.AddScoped(i, t);
-    }
-}
+builder.Services.ConfigureServices();
 
 var app = builder.Build();
 
