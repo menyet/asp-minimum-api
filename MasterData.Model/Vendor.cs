@@ -24,7 +24,7 @@ public class Vendor
 
     public required string Notes { get; set; }
 
-    public ICollection<BankAccount> BankAccount { get; set; } = null!;
+    public ICollection<BankAccount> BankAccounts { get; set; } = null!;
 
     public ICollection<ContactPerson> ContactPersons { get; set; } = null!;
 }
