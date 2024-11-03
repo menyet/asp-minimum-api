@@ -1,9 +1,14 @@
-﻿using MasterData.Domain;
+﻿using System.Security.Cryptography;
+using System.Text.Json;
+using System.Text;
+
+using MasterData.Domain;
 using MasterData.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace MasterData.Host.Endpoints
 {
@@ -39,7 +44,25 @@ namespace MasterData.Host.Endpoints
             return vendor.Id;
         }
 
-        public static Task<VendorModel[]> GetVendors([FromServices] IFacade facade, CancellationToken cancellationToken) => facade.GetVendors(cancellationToken);
+        public static async Task<VendorModel[]> GetVendors([FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        {
+            var cachedVendors = await cache.GetAsync("vendors");
+
+            if (cachedVendors is null)
+            {
+                var vendors = await facade.GetVendors(cancellationToken);
+
+                await cache.SetAsync("vendors", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(vendors)), new()
+                {
+                    AbsoluteExpiration = DateTime.Now.AddSeconds(10)
+                });
+
+                return vendors;
+            }
+
+            // TODO: handle null
+            return JsonSerializer.Deserialize<VendorModel[]>(cachedVendors) ?? [];
+        }
 
         public static async Task<VendorDetails?> GetVendor(int id, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
