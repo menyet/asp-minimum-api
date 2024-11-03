@@ -1,3 +1,6 @@
+using MasterData.Domain;
+using MasterData.Host.Endpoints;
+
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +12,17 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DatabaseContext>(_ => _.UseSqlServer(builder.Configuration.GetConnectionString("SQLDatabase")));
 
+
+var assembly = typeof(VendorOperations).Assembly;
+var types = assembly.GetTypes().Where(_ => _.IsClass && !_.IsAbstract).ToArray();
+
+foreach (var t in types.Where(_ => _.IsAssignableTo(typeof(IDbFacade))))
+{
+    foreach (var i in t.GetInterfaces().Where(_ => _.Assembly == assembly))
+    {
+        builder.Services.AddScoped(i, t);
+    }
+}
 
 var app = builder.Build();
 
@@ -28,29 +42,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+app.MapGroup("vendors").ConfigureVendorOperations();
+//.WithName("GetWeatherForecast")
+//.WithOpenApi();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
