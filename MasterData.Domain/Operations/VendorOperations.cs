@@ -14,11 +14,13 @@ namespace MasterData.Host.Endpoints
 {
     public static class VendorOperations
     {
-        public static void ConfigureVendorOperations(this IEndpointRouteBuilder builder)
+        public static IEndpointRouteBuilder ConfigureVendorOperations(this IEndpointRouteBuilder builder)
         {
             builder.MapGet("/", GetVendors).RequireAuthorization();
             builder.MapGet("/{vendorId}", GetVendor).RequireAuthorization(builder => builder.RequireRole("MasterDataManager"));
             builder.MapPost("/", AddVendor).RequireAuthorization();
+
+            return builder;
         }
 
         public static async Task<int> AddVendor(NewVendorModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)

@@ -40,7 +40,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGroup("vendors").ConfigureVendorOperations();
+app.MapGroup("vendors")
+    .ConfigureVendorOperations()
+    .ConfigureBankAccountOperations();
+
 //.WithName("GetWeatherForecast")
 //.WithOpenApi();
 
