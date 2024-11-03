@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.Services.AddDbContext<DatabaseContext>(_ => _.UseSqlServer(builder.Configuration.GetConnectionString("SQLDatabase")));
 
 builder.Services
@@ -15,6 +17,8 @@ builder.Services
     .AddAuthorization();
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 
 // TODO: does not scale, should be done during deployment

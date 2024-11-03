@@ -9,6 +9,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterData.Model", "MasterD
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterData.Domain", "MasterData.Domain\MasterData.Domain.csproj", "{F59272CD-B58B-45BF-88CB-083C3BA20063}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasterData.AppHost", "MasterData.AppHost\MasterData.AppHost.csproj", "{E7A5DA70-FFD5-4E0C-A823-78B0EA801C2E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MasterData.ServiceDefaults", "MasterData.ServiceDefaults\MasterData.ServiceDefaults.csproj", "{45954525-1967-4F3A-B24E-FE7BEF1F637A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{F59272CD-B58B-45BF-88CB-083C3BA20063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F59272CD-B58B-45BF-88CB-083C3BA20063}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F59272CD-B58B-45BF-88CB-083C3BA20063}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7A5DA70-FFD5-4E0C-A823-78B0EA801C2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7A5DA70-FFD5-4E0C-A823-78B0EA801C2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7A5DA70-FFD5-4E0C-A823-78B0EA801C2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7A5DA70-FFD5-4E0C-A823-78B0EA801C2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45954525-1967-4F3A-B24E-FE7BEF1F637A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45954525-1967-4F3A-B24E-FE7BEF1F637A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45954525-1967-4F3A-B24E-FE7BEF1F637A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45954525-1967-4F3A-B24E-FE7BEF1F637A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

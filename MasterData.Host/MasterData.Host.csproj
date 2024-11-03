@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MasterData.Domain\MasterData.Domain.csproj" />
+    <ProjectReference Include="..\MasterData.ServiceDefaults\MasterData.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>
