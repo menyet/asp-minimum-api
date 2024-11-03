@@ -12,7 +12,7 @@ namespace MasterData.Host.Endpoints
         public static void ConfigureVendorOperations(this IEndpointRouteBuilder builder)
         {
             builder.MapGet("/", GetVendors).RequireAuthorization();
-            builder.MapGet("/{vendorId}", GetVendor).RequireAuthorization();
+            builder.MapGet("/{vendorId}", GetVendor).RequireAuthorization(builder => builder.RequireRole("MasterDataManager"));
             builder.MapPost("/", AddVendor).RequireAuthorization();
         }
 
