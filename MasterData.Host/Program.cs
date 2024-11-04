@@ -42,7 +42,8 @@ app.UseAuthorization();
 
 app.MapGroup("vendors")
     .ConfigureVendorOperations()
-    .ConfigureBankAccountOperations();
+    .ConfigureBankAccountOperations()
+    .ConfigureContactPersonOperations();
 
 //.WithName("GetWeatherForecast")
 //.WithOpenApi();
