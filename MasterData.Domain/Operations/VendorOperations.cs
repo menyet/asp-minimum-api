@@ -19,6 +19,7 @@ namespace MasterData.Host.Endpoints
             builder.MapGet("/", GetVendors).RequireAuthorization();
             builder.MapGet("/{vendorId}", GetVendor).RequireAuthorization(builder => builder.RequireRole("MasterDataManager"));
             builder.MapPost("/", AddVendor).RequireAuthorization();
+            builder.MapPut("/{vendorId}", UpdateVendor).RequireAuthorization();
 
             return builder;
         }
@@ -46,6 +47,28 @@ namespace MasterData.Host.Endpoints
             await cache.RemoveAsync("vendors", cancellationToken);
 
             return vendor.Id;
+        }
+
+        public static async Task UpdateVendor(int vendorId, NewVendorModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        {
+            var vendor = await facade.Get<Vendor>(vendorId, cancellationToken)
+                ?? throw new InvalidOperationException();
+
+            vendor.Name = payload.Name;
+            vendor.Name2 = payload.Name2;
+            vendor.Address1 = payload.Address1;
+            vendor.Address2 = payload.Address2;
+            vendor.ZIP = payload.ZIP;
+            vendor.Country = payload.Country;
+            vendor.City = payload.City;
+            vendor.Mail = payload.Mail;
+            vendor.Phone = payload.Phone;
+            vendor.Notes = payload.Notes;
+
+            await facade.Save(cancellationToken);
+
+            await cache.RemoveAsync("vendors", cancellationToken);
+            await cache.RemoveAsync($"vendors-{vendorId}", cancellationToken);
         }
 
         public static async Task<VendorModel[]> GetVendors([FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
