@@ -94,6 +94,8 @@ namespace MasterData.Host.Endpoints
                     ?? throw new NotFoundException<Vendor>();
 
                 vendorModel = new VendorDetails(vendor.Id, vendor.Name, vendor.Name2, vendor.Address1, vendor.Address2);
+
+                await cache.Set($"{CacheKey}-{vendorId}", vendorModel, cancellationToken);
             }
 
             return vendorModel;
