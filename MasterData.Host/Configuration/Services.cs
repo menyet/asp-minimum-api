@@ -1,4 +1,5 @@
-﻿using MasterData.Domain.Cache;
+﻿using MasterData.Domain;
+using MasterData.Domain.Cache;
 using MasterData.Host.Endpoints;
 
 namespace MasterData.Host.Configuration;
