@@ -1,14 +1,9 @@
-﻿using System.Text.Json;
-using System.Text;
-
-using MasterData.Domain;
+﻿using MasterData.Domain;
 using MasterData.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.AspNetCore.Http;
 using MasterData.Domain.Exceptions;
 
 namespace MasterData.Host.Endpoints
@@ -27,7 +22,7 @@ namespace MasterData.Host.Endpoints
             return builder;
         }
 
-        public static async Task<int> AddContactPerson(int vendorId, NewContactPersonModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        public static async Task<int> AddContactPerson(int vendorId, NewContactPersonModel payload, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
             var contactPerson = new ContactPerson
             {
@@ -42,12 +37,10 @@ namespace MasterData.Host.Endpoints
 
             await facade.Save(cancellationToken);
 
-            await cache.RemoveAsync("ContactPersons", cancellationToken);
-
             return contactPerson.Id;
         }
 
-        public static async Task UpdateContactPerson(int vendorId, int contactPersonId, UpdateContactPersonModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        public static async Task UpdateContactPerson(int vendorId, int contactPersonId, UpdateContactPersonModel payload, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
             var contactPerson = await facade.Get<ContactPerson>(contactPersonId, cancellationToken)
                 ?? throw new NotFoundException<ContactPerson>();
@@ -63,39 +56,23 @@ namespace MasterData.Host.Endpoints
             contactPerson.Mail = payload.Mail;
 
             await facade.Save(cancellationToken);
-
-            await cache.RemoveAsync("ContactPersons", cancellationToken);
-            await cache.RemoveAsync($"ContactPersons-{contactPersonId}", cancellationToken);
         }
 
-        public static async Task<ContactPersonModel[]> GetContactPersons(int vendorId, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        public static async Task<ContactPersonModel[]> GetContactPersons(int vendorId, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
-            var cachedContactPersons = await cache.GetAsync("ContactPersons");
+            var contactPersons = await facade.GetContactPersons(vendorId, cancellationToken);
 
-            if (cachedContactPersons is null)
-            {
-                var contactPersons = await facade.GetContactPersons(vendorId, cancellationToken);
-
-                await cache.SetAsync("ContactPersons", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(contactPersons)), new()
-                {
-                    AbsoluteExpiration = DateTime.Now.AddSeconds(10)
-                });
-
-                return contactPersons;
-            }
-
-            // TODO: handle null
-            return JsonSerializer.Deserialize<ContactPersonModel[]>(cachedContactPersons) ?? [];
+            return contactPersons;
         }
 
         public static async Task<ContactPersonDetails?> GetContactPerson(int vendorId, int contactPersonId, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
             var contactPerson = await facade.Get<ContactPerson>(contactPersonId, cancellationToken)
-                ?? throw new InvalidOperationException();
+                ?? throw new NotFoundException<ContactPerson>();
 
             if (vendorId != contactPerson.VendorId)
             {
-                throw new InvalidOperationException();
+                throw new NotFoundException<ContactPerson>();
             }
 
             return new ContactPersonDetails

@@ -1,14 +1,10 @@
-﻿using System.Text.Json;
-using System.Text;
-
-using MasterData.Domain;
+﻿using MasterData.Domain;
 using MasterData.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.AspNetCore.Http;
 using MasterData.Domain.Exceptions;
 
 namespace MasterData.Host.Endpoints
@@ -27,7 +23,7 @@ namespace MasterData.Host.Endpoints
             return builder;
         }
 
-        public static async Task<int> AddBankAccount(int vendorId, NewBankAccountModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        public static async Task<int> AddBankAccount(int vendorId, NewBankAccountModel payload, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
             var bankAccount = new BankAccount
             { 
@@ -40,8 +36,6 @@ namespace MasterData.Host.Endpoints
             facade.Add(bankAccount);
 
             await facade.Save(cancellationToken);
-
-            await cache.RemoveAsync("BankAccounts", cancellationToken);
 
             return bankAccount.Id;
         }
@@ -66,24 +60,11 @@ namespace MasterData.Host.Endpoints
             await cache.RemoveAsync($"BankAccounts-{bankAccountId}", cancellationToken);
         }
 
-        public static async Task<BankAccountModel[]> GetBankAccounts(int vendorId, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        public static async Task<BankAccountModel[]> GetBankAccounts(int vendorId, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
-            var cachedBankAccounts = await cache.GetAsync("BankAccounts");
+            var bankAccounts = await facade.GetBankAccounts(vendorId, cancellationToken);
 
-            if (cachedBankAccounts is null)
-            {
-                var bankAccounts = await facade.GetBankAccounts(vendorId, cancellationToken);
-
-                await cache.SetAsync("BankAccounts", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(bankAccounts)), new()
-                {
-                    AbsoluteExpiration = DateTime.Now.AddSeconds(10)
-                });
-
-                return bankAccounts;
-            }
-
-            // TODO: handle null
-            return JsonSerializer.Deserialize<BankAccountModel[]>(cachedBankAccounts) ?? [];
+            return bankAccounts;
         }
 
         public static async Task<BankAccountDetails?> GetBankAccount(int vendorId, int bankAccountId, [FromServices] IFacade facade, CancellationToken cancellationToken)
