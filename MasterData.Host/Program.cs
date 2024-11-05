@@ -16,7 +16,8 @@ builder.Services
     .ConfigureServices()
     .ConfigureSwagger(builder.Configuration)
     .ConfigureAuthentication(builder.Configuration)
-    .AddAuthorization();
+    .AddAuthorization()
+    .AddProblemDetails();
 
 var app = builder.Build();
 
@@ -44,8 +45,5 @@ app.MapGroup("vendors")
     .ConfigureVendorOperations()
     .ConfigureBankAccountOperations()
     .ConfigureContactPersonOperations();
-
-//.WithName("GetWeatherForecast")
-//.WithOpenApi();
 
 app.Run();

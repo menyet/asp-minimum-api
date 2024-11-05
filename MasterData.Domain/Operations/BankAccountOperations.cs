@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.AspNetCore.Http;
+using MasterData.Domain.Exceptions;
 
 namespace MasterData.Host.Endpoints
 {
@@ -17,10 +19,10 @@ namespace MasterData.Host.Endpoints
         {
             var subGroup = builder.MapGroup("{vendorId}/bank-accounts");
 
-            subGroup.MapGet("/", GetBankAccounts).RequireAuthorization();
-            subGroup.MapGet("/{bankAccountId}", GetBankAccount).RequireAuthorization(builder => builder.RequireRole("MasterDataManager"));
-            subGroup.MapPost("/", AddBankAccount).RequireAuthorization();
-            subGroup.MapPut("/{bankAccountId}", UpdateBankAccount).RequireAuthorization();
+            subGroup.MapGet("/", GetBankAccounts).ConfigureEndpoint("Get bank accounts of a vendor", "Bank accounts");
+            subGroup.MapGet("/{bankAccountId}", GetBankAccount).ConfigureEndpoint("Get details of a vendor bank account", "Bank accounts");
+            subGroup.MapPost("/", AddBankAccount).ConfigureEndpoint("Add bank account", "Bank accounts");
+            subGroup.MapPut("/{bankAccountId}", UpdateBankAccount).ConfigureEndpoint("Update bank accounts", "Bank accounts");
 
             return builder;
         }
@@ -47,11 +49,11 @@ namespace MasterData.Host.Endpoints
         public static async Task UpdateBankAccount(int vendorId, int bankAccountId, UpdateBankAccountModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
         {
             var bankAccount = await facade.Get<BankAccount>(bankAccountId, cancellationToken)
-                ?? throw new InvalidOperationException();
+                ?? throw new NotFoundException<BankAccount>();
 
             if (vendorId != bankAccount.VendorId)
             {
-                throw new InvalidOperationException();
+                throw new NotFoundException<BankAccount>();
             }
 
             bankAccount.Name = payload.Name;
@@ -87,11 +89,11 @@ namespace MasterData.Host.Endpoints
         public static async Task<BankAccountDetails?> GetBankAccount(int vendorId, int bankAccountId, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
             var bankAccount = await facade.Get<BankAccount>(bankAccountId, cancellationToken)
-                ?? throw new InvalidOperationException();
+                ?? throw new NotFoundException<BankAccount>();
 
             if (vendorId != bankAccount.VendorId)
             {
-                throw new InvalidOperationException();
+                throw new NotFoundException<BankAccount>();
             }
 
             return new BankAccountDetails

@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.AspNetCore.Http;
+using MasterData.Domain.Exceptions;
 
 namespace MasterData.Host.Endpoints
 {
@@ -17,10 +19,10 @@ namespace MasterData.Host.Endpoints
         {
             var subGroup = builder.MapGroup("{vendorId}/contact-persons");
 
-            subGroup.MapGet("/", GetContactPersons).RequireAuthorization();
-            subGroup.MapGet("/{contactPersonId}", GetContactPerson).RequireAuthorization(builder => builder.RequireRole("MasterDataManager"));
-            subGroup.MapPost("/", AddContactPerson).RequireAuthorization();
-            subGroup.MapPut("/{contactPersonId}", UpdateContactPerson).RequireAuthorization();
+            subGroup.MapGet("/", GetContactPersons).ConfigureEndpoint("Get contact persons of a vendor", "Contact persons");
+            subGroup.MapGet("/{contactPersonId}", GetContactPerson).ConfigureEndpoint("Get details of a contact person", "Contact persons");
+            subGroup.MapPost("/", AddContactPerson).ConfigureEndpoint("Add contact person", "Contact persons");
+            subGroup.MapPut("/{contactPersonId}", UpdateContactPerson).ConfigureEndpoint("Update contact person", "Contact persons");
 
             return builder;
         }
@@ -48,11 +50,11 @@ namespace MasterData.Host.Endpoints
         public static async Task UpdateContactPerson(int vendorId, int contactPersonId, UpdateContactPersonModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
         {
             var contactPerson = await facade.Get<ContactPerson>(contactPersonId, cancellationToken)
-                ?? throw new InvalidOperationException();
+                ?? throw new NotFoundException<ContactPerson>();
 
             if (vendorId != contactPerson.VendorId)
             {
-                throw new InvalidOperationException();
+                throw new NotFoundException<ContactPerson>();
             }
 
             contactPerson.FirstName = payload.FirstName;

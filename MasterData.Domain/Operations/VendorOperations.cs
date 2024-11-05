@@ -1,4 +1,3 @@
-﻿using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text;
 
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using MasterData.Domain.Exceptions;
 
 namespace MasterData.Host.Endpoints
 {
@@ -16,10 +16,10 @@ namespace MasterData.Host.Endpoints
     {
         public static IEndpointRouteBuilder ConfigureVendorOperations(this IEndpointRouteBuilder builder)
         {
-            builder.MapGet("/", GetVendors).RequireAuthorization();
-            builder.MapGet("/{vendorId}", GetVendor).RequireAuthorization(builder => builder.RequireRole("MasterDataManager"));
-            builder.MapPost("/", AddVendor).RequireAuthorization();
-            builder.MapPut("/{vendorId}", UpdateVendor).RequireAuthorization();
+            builder.MapGet("/", GetVendors).ConfigureEndpoint("Get all vendors", "Vendors");
+            builder.MapGet("/{vendorId}", GetVendor).ConfigureEndpoint("Get details of a vendor", "Vendors");
+            builder.MapPost("/", AddVendor).ConfigureEndpoint("Add vendor", "Vendors");
+            builder.MapPut("/{vendorId}", UpdateVendor).ConfigureEndpoint("Update vendor", "Vendors");
 
             return builder;
         }
@@ -52,7 +52,7 @@ namespace MasterData.Host.Endpoints
         public static async Task UpdateVendor(int vendorId, NewVendorModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
         {
             var vendor = await facade.Get<Vendor>(vendorId, cancellationToken)
-                ?? throw new InvalidOperationException();
+                ?? throw new NotFoundException<Vendor>();
 
             vendor.Name = payload.Name;
             vendor.Name2 = payload.Name2;
@@ -94,7 +94,7 @@ namespace MasterData.Host.Endpoints
         public static async Task<VendorDetails?> GetVendor(int id, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
             var vendor = await facade.Get<Vendor>(id, cancellationToken)
-                ?? throw new InvalidOperationException();
+                ?? throw new NotFoundException<Vendor>();
 
             return new VendorDetails(vendor.Id, vendor.Name, vendor.Name2, vendor.Address1, vendor.Address2);
         }
