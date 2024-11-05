@@ -100,7 +100,7 @@ namespace MasterData.Host.Endpoints
         }
 
 
-        public interface IFacade : IBasicOperations
+        public interface IFacade : IBasicDatabaseOperations
         {
             public Task<VendorModel[]> GetVendors(CancellationToken cancellationToken) => Db.Set<Vendor>().Select(vendor => new VendorModel(vendor.Id, vendor.Name, vendor.Name2)).ToArrayAsync(cancellationToken);
         }

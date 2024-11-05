@@ -86,7 +86,7 @@ namespace MasterData.Host.Endpoints
             };
         }
 
-        public interface IFacade : IBasicOperations
+        public interface IFacade : IBasicDatabaseOperations
         {
             public Task<BankAccountModel[]> GetBankAccounts(int vendorId, CancellationToken cancellationToken) => 
                 Db.Set<BankAccount>()

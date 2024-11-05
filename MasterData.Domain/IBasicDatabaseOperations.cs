@@ -1,14 +1,12 @@
 ﻿using System.Threading;
 
-using MasterData.Domain;
-
 using Microsoft.EntityFrameworkCore;
 
-namespace MasterData.Host.Endpoints
+namespace MasterData.Domain
 {
     public interface IDbFacade { }
 
-    public interface IBasicOperations : IDbFacade
+    public interface IBasicDatabaseOperations : IDbFacade
     {
         DatabaseContext Db { get; }
 

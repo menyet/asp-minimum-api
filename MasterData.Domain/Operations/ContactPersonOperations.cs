@@ -85,7 +85,7 @@ namespace MasterData.Host.Endpoints
             };
         }
 
-        public interface IFacade : IBasicOperations
+        public interface IFacade : IBasicDatabaseOperations
         {
             public Task<ContactPersonModel[]> GetContactPersons(int vendorId, CancellationToken cancellationToken) => 
                 Db.Set<ContactPerson>()
