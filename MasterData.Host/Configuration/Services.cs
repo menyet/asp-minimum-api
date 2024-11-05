@@ -1,4 +1,5 @@
-﻿using MasterData.Host.Endpoints;
+﻿using MasterData.Domain.Cache;
+using MasterData.Host.Endpoints;
 
 namespace MasterData.Host.Configuration;
 
@@ -16,6 +17,8 @@ public static class Services
                 services.AddScoped(i, t);
             }
         }
+
+        services.AddScoped<IItemCache, ItemCache>();
 
         return services;
     }

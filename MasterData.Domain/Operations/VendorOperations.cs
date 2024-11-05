@@ -1,19 +1,18 @@
-using System.Text.Json;
-using System.Text;
-
 using MasterData.Domain;
 using MasterData.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using MasterData.Domain.Exceptions;
+using MasterData.Domain.Cache;
 
 namespace MasterData.Host.Endpoints
 {
     public static class VendorOperations
     {
+        public const string CacheKey = "vendors";
+
         public static IEndpointRouteBuilder ConfigureVendorOperations(this IEndpointRouteBuilder builder)
         {
             builder.MapGet("/", GetVendors).ConfigureEndpoint("Get all vendors", "Vendors");
@@ -24,7 +23,7 @@ namespace MasterData.Host.Endpoints
             return builder;
         }
 
-        public static async Task<int> AddVendor(NewVendorModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        public static async Task<int> AddVendor(NewVendorModel payload, [FromServices] IFacade facade, [FromServices] IItemCache cache, CancellationToken cancellationToken)
         {
             var vendor = new Vendor
             {
@@ -44,12 +43,12 @@ namespace MasterData.Host.Endpoints
 
             await facade.Save(cancellationToken);
 
-            await cache.RemoveAsync("vendors", cancellationToken);
+            await cache.Remove(CacheKey, cancellationToken);
 
             return vendor.Id;
         }
 
-        public static async Task UpdateVendor(int vendorId, NewVendorModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        public static async Task UpdateVendor(int vendorId, NewVendorModel payload, [FromServices] IFacade facade, [FromServices] IItemCache cache, CancellationToken cancellationToken)
         {
             var vendor = await facade.Get<Vendor>(vendorId, cancellationToken)
                 ?? throw new NotFoundException<Vendor>();
@@ -67,36 +66,37 @@ namespace MasterData.Host.Endpoints
 
             await facade.Save(cancellationToken);
 
-            await cache.RemoveAsync("vendors", cancellationToken);
-            await cache.RemoveAsync($"vendors-{vendorId}", cancellationToken);
+            await cache.Remove(CacheKey, cancellationToken);
+            await cache.Remove($"{CacheKey}-{vendorId}", cancellationToken);
         }
 
-        public static async Task<VendorModel[]> GetVendors([FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        public static async Task<VendorModel[]> GetVendors([FromServices] IFacade facade, [FromServices] IItemCache cache, CancellationToken cancellationToken)
         {
-            var cachedVendors = await cache.GetAsync("vendors");
+            var vendors = await cache.Get<VendorModel[]>(CacheKey, cancellationToken);
 
-            if (cachedVendors is null)
+            if (vendors is null)
             {
-                var vendors = await facade.GetVendors(cancellationToken);
+                vendors = await facade.GetVendors(cancellationToken);
 
-                await cache.SetAsync("vendors", Encoding.UTF8.GetBytes(JsonSerializer.Serialize(vendors)), new()
-                {
-                    AbsoluteExpiration = DateTime.Now.AddSeconds(10)
-                });
-
-                return vendors;
+                await cache.Set(CacheKey, vendors, cancellationToken);
             }
 
-            // TODO: handle null
-            return JsonSerializer.Deserialize<VendorModel[]>(cachedVendors) ?? [];
+            return vendors;
         }
 
-        public static async Task<VendorDetails?> GetVendor(int id, [FromServices] IFacade facade, CancellationToken cancellationToken)
+        public static async Task<VendorDetails?> GetVendor(int vendorId, [FromServices] IFacade facade, [FromServices] IItemCache cache, CancellationToken cancellationToken)
         {
-            var vendor = await facade.Get<Vendor>(id, cancellationToken)
-                ?? throw new NotFoundException<Vendor>();
+            var vendorModel = await cache.Get<VendorDetails>($"{CacheKey}-{vendorId}", cancellationToken);
 
-            return new VendorDetails(vendor.Id, vendor.Name, vendor.Name2, vendor.Address1, vendor.Address2);
+            if (vendorModel is null)
+            {
+                var vendor = await facade.Get<Vendor>(vendorId, cancellationToken)
+                    ?? throw new NotFoundException<Vendor>();
+
+                vendorModel = new VendorDetails(vendor.Id, vendor.Name, vendor.Name2, vendor.Address1, vendor.Address2);
+            }
+
+            return vendorModel;
         }
 
 
