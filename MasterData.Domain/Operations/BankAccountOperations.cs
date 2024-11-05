@@ -40,7 +40,7 @@ namespace MasterData.Host.Endpoints
             return bankAccount.Id;
         }
 
-        public static async Task UpdateBankAccount(int vendorId, int bankAccountId, UpdateBankAccountModel payload, [FromServices] IFacade facade, [FromServices] IDistributedCache cache, CancellationToken cancellationToken)
+        public static async Task UpdateBankAccount(int vendorId, int bankAccountId, UpdateBankAccountModel payload, [FromServices] IFacade facade, CancellationToken cancellationToken)
         {
             var bankAccount = await facade.Get<BankAccount>(bankAccountId, cancellationToken)
                 ?? throw new NotFoundException<BankAccount>();
@@ -55,9 +55,6 @@ namespace MasterData.Host.Endpoints
             bankAccount.BIC = payload.BIC;
 
             await facade.Save(cancellationToken);
-
-            await cache.RemoveAsync("BankAccounts", cancellationToken);
-            await cache.RemoveAsync($"BankAccounts-{bankAccountId}", cancellationToken);
         }
 
         public static async Task<BankAccountModel[]> GetBankAccounts(int vendorId, [FromServices] IFacade facade, CancellationToken cancellationToken)
