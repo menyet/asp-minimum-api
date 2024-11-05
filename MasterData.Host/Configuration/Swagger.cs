@@ -1,4 +1,6 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using MasterData.Domain.Exceptions;
+
+using Microsoft.OpenApi.Models;
 
 namespace MasterData.Host.Configuration;
 
@@ -6,10 +8,10 @@ public static class Swagger
 {
     public static IServiceCollection ConfigureSwagger(this IServiceCollection services, IConfiguration configuration)
     {
-        var authority = configuration.GetSection("Authentication:Authority").Value ?? throw new InvalidOperationException();
+        var authority = configuration.GetSection("Authentication:Authority").Value ?? throw new ConfigurationErrorException("Missing Authentication:Authority");
         var authorizationUrl = $"{authority}/oauth2/v2.0/authorize";
         var tokenUrl = $"{authority}/oauth2/v2.0/token";
-        var authScope = configuration.GetSection("Authentication:Scope").Value ?? throw new InvalidOperationException();
+        var authScope = configuration.GetSection("Authentication:Scope").Value ?? throw new ConfigurationErrorException("Missing Authentication:Scope");
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -55,7 +57,7 @@ public static class Swagger
 
     public static IApplicationBuilder EnableSwagger(this IApplicationBuilder app, IConfiguration configuration)
     {
-        var clientId = configuration.GetSection("Authentication:ClientId").Value ?? throw new InvalidOperationException();
+        var clientId = configuration.GetSection("Authentication:ClientId").Value ?? throw new ConfigurationErrorException("Missing Authentication:ClientId");
 
         app.UseSwagger();
         

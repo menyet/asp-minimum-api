@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using MasterData.Domain.Exceptions;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MasterData.Host.Configuration;
@@ -7,8 +9,8 @@ public static class AuthenticationConfiguration
 {
     public static IServiceCollection ConfigureAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        var audience = configuration.GetSection("Authentication:Audience").Value ?? throw new InvalidOperationException();
-        var authority = configuration.GetSection("Authentication:Authority").Value ?? throw new InvalidOperationException();
+        var audience = configuration.GetSection("Authentication:Audience").Value ?? throw new ConfigurationErrorException("Missing Authentication:Audience");
+        var authority = configuration.GetSection("Authentication:Authority").Value ?? throw new ConfigurationErrorException("Missing Authentication:Authority");
 
         services.AddAuthentication(option =>
         {
