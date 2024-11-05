@@ -25,6 +25,7 @@ app.MapDefaultEndpoints();
 
 
 // TODO: does not scale, should be done during deployment
+// TODO: add migrations
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
